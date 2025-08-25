@@ -1,0 +1,89 @@
+#include <stdio.h>
+
+#define MAX 100
+
+// Structure to represent an edge
+struct Edge {
+    int u, v, w;
+};
+
+// Find parent of a node (with path compression)
+int find(int parent[], int i) {
+    if (parent[i] == i)
+        return i;
+    return parent[i] = find(parent, parent[i]);
+}
+
+// Union of two sets
+void unionSets(int parent[], int rank[], int u, int v) {
+    int rootU = find(parent, u);
+    int rootV = find(parent, v);
+
+    if (rank[rootU] < rank[rootV]) {
+        parent[rootU] = rootV;
+    } else if (rank[rootU] > rank[rootV]) {
+        parent[rootV] = rootU;
+    } else {
+        parent[rootV] = rootU;
+        rank[rootU]++;
+    }
+}
+
+int main() {
+    int n, e;
+    struct Edge edges[MAX];
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+    printf("Enter edges (u v w):\n");
+    for (int i = 0; i < e; i++) {
+        scanf("%d %d %d", &edges[i].u, &edges[i].v, &edges[i].w);
+    }
+
+    // Sort edges by weight (Bubble Sort for simplicity)
+    for (int i = 0; i < e - 1; i++) {
+        for (int j = 0; j < e - i - 1; j++) {
+            if (edges[j].w > edges[j + 1].w) {
+                struct Edge temp = edges[j];
+                edges[j] = edges[j + 1];
+                edges[j + 1] = temp;
+            }
+        }
+    }
+
+    int parent[MAX], rank[MAX];
+
+    // Initialize Disjoint Set
+    for (int i = 0; i < n; i++) {
+        parent[i] = i;
+        rank[i] = 0;
+    }
+
+    printf("Edges in the Minimum Spanning Tree:\n");
+    int mstWeight = 0;
+    int count = 0;
+
+    for (int i = 0; i < e && count < n - 1; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int w = edges[i].w;
+
+        int rootU = find(parent, u);
+        int rootV = find(parent, v);
+
+        if (rootU != rootV) {
+            printf("%d - %d : %d\n", u, v, w);
+            mstWeight += w;
+            unionSets(parent, rank, rootU, rootV);
+            count++;
+        }
+    }
+
+    printf("Total weight of MST = %d\n", mstWeight);
+
+    return 0;
+}
