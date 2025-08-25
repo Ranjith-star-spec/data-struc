@@ -1,0 +1,84 @@
+#include <stdio.h>
+#define INF 9999
+#define MAX 100
+
+void dijkstra(int n, int graph[MAX][MAX], int start) {
+    int cost[MAX][MAX], distance[MAX], visited[MAX], pred[MAX];
+    int count, mindistance, nextnode, i, j;
+
+    // Step 1: Create cost matrix (replace 0 with INF except diagonal)
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            if (graph[i][j] == 0)
+                cost[i][j] = INF;
+            else
+                cost[i][j] = graph[i][j];
+
+    // Step 2: Initialize distances, predecessors and visited[]
+    for (i = 0; i < n; i++) {
+        distance[i] = cost[start][i];
+        pred[i] = start;
+        visited[i] = 0;
+    }
+
+    distance[start] = 0;
+    visited[start] = 1;
+    count = 1;
+
+    // Step 3: Main loop
+    while (count < n - 1) {
+        mindistance = INF;
+
+        // Find unvisited node with smallest distance
+        for (i = 0; i < n; i++)
+            if (distance[i] < mindistance && !visited[i]) {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+
+        visited[nextnode] = 1;
+
+        // Update distances
+        for (i = 0; i < n; i++)
+            if (!visited[i])
+                if (mindistance + cost[nextnode][i] < distance[i]) {
+                    distance[i] = mindistance + cost[nextnode][i];
+                    pred[i] = nextnode;
+                }
+        count++;
+    }
+
+    // Step 4: Print the result
+    printf("\nShortest distances from node %d:\n", start);
+    for (i = 0; i < n; i++) {
+        if (i != start) {
+            printf("To node %d = %d via path: %d", i, distance[i], i);
+            j = i;
+            while (j != start) {
+                j = pred[j];
+                printf(" <- %d", j);
+            }
+            printf("\n");
+        }
+    }
+}
+
+int main() {
+    int n, i, j, start;
+    int graph[MAX][MAX];
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter adjacency matrix (0 if no edge):\n");
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+
+    printf("Enter starting node: ");
+    scanf("%d", &start);
+
+    dijkstra(n, graph, start);
+
+    return 0;
+}
